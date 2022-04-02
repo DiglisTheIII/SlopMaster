@@ -21,15 +21,19 @@ import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.IMentionable;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Message.Attachment;
 import net.dv8tion.jda.api.entities.Message.MentionType;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.Activity.Emoji;
+import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -43,6 +47,7 @@ public class Commands extends ListenerAdapter {
 	public int randCounter = ThreadLocalRandom.current().nextInt(50, 250);
 	public int sloppy = 0;
 	public int yed = 0;
+	public GuildMessageReceivedEvent event;
 	public String[] pathArray = {"C:/Users/mmmmm/Desktop/chicken/1.png", 
 			"C:/Users/mmmmm/Desktop/chicken/2.png",
 			"C:/Users/mmmmm/Desktop/chicken/3.png",
@@ -62,12 +67,15 @@ public class Commands extends ListenerAdapter {
 	public String[] gifPathArray = {"C:/Users/mmmmm/Desktop/chicken/acorn.gif",
 			"C:/Users/mmmmm/Desktop/chicken/dance.gif"};
 	
+	public String nameChange = "";
+	
 	
 	public JoeFileCount joeFile = new JoeFileCount();
 	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 		//List<Role> allRoles = event.getGuild().getRoles();
 		//allRoles = allRoles.subList(0, allRoles.size() - 1);
+		
 		CommandShortcuts scts = new CommandShortcuts();
 		String[] args = event.getMessage().getContentRaw().split(" ");
 		String userStr = event.getAuthor().toString().substring(2).replaceAll("[0-9()]", "");
@@ -648,7 +656,7 @@ public class Commands extends ListenerAdapter {
 		}
 		
 		if(args[0].equalsIgnoreCase("gay") && args[1].equalsIgnoreCase("amongus")) {
-			scts.sendMessage(event, "𐐘", false);
+			scts.sendMessage(event, "ð��˜", false);
 		}
 		if((args[0].equalsIgnoreCase("computer") && args[1].equalsIgnoreCase("am") && args[2].equalsIgnoreCase("i") && args[3].equalsIgnoreCase("cool"))) {
 			scts.sendMessage(event, "yes", true);
@@ -736,7 +744,7 @@ public class Commands extends ListenerAdapter {
 		    int i = 0;
 			for(Member member : event.getGuild().getMembers()) {
 				if(self.canInteract(member) && i < arr.size()) {
-					event.getGuild().modifyNickname(member, "𐐘").queue();
+					event.getGuild().modifyNickname(member, getName()).queue();
 					i++;
 				}
 			}
@@ -1041,6 +1049,11 @@ public class Commands extends ListenerAdapter {
 			}
 		}
 		for(int i = 0; i < args.length; i++) {
+			if(event.getAuthor().getId().equals("530269428185825290") && args[i].equalsIgnoreCase("kys")) {
+				scts.react(event, "🤓");
+			}
+		}
+		for(int i = 0; i < args.length; i++) {
 			for(String m : bannedWords) {
 				if(args[i].equalsIgnoreCase(m) && !event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
 					scts.deleteMessage(event);
@@ -1062,6 +1075,11 @@ public class Commands extends ListenerAdapter {
 			return;
 		}
 		
+	}
+	
+	
+	public String getName() {
+		return this.nameChange;
 	}
 	
 	public int joeCheck(int joeCount) {
@@ -1110,6 +1128,10 @@ public class Commands extends ListenerAdapter {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	public void setName(String name) {
+		this.nameChange = name;
 	}
 }
 
