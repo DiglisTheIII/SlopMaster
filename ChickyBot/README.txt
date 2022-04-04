@@ -1,4 +1,4 @@
-ChickenBot readme and command list!
+Slop Master readme and command list!
 Thank you for allowing this terrible bot to be in your server, I am very flattered.
 
 This bot is still a WIP, so if some commands do not work, or are not listed, it is because they are specific to my personal server.
