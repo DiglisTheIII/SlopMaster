@@ -13,7 +13,7 @@ import tools.LogEvent;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        JDA jda = JDABuilder.createDefault("OTQ1MjUwNjA0ODQ1MDA2ODQ4.GBJLLt.sjwZFbsWAJoKfcvYHjxxiKm9p53og_Jy7KY_-Q")
+        JDA jda = JDABuilder.createDefault("OTQ1MjUwNjA0ODQ1MDA2ODQ4.G0ktLB.ANXwH2dCSD7eFU7ZtOcRIGipCVcI8a6cL4Eq0k")
         .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES)
         .addEventListeners(new CommandHandler()).build();
 
@@ -41,8 +41,10 @@ class CommandHandler extends ListenerAdapter {
                         com.createNewFile();
                         break;
                     case "sloploan":
-                        com.getSlopLoan();
+                        com.getSlopLoan(false);
                         break;
+                    case "payloan":
+                        com.getSlopLoan(true);
                     case "backup":
                         adm.createBackup();
                         break;
