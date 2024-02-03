@@ -6,20 +6,12 @@ public class GitIgnore {
     
     public static String token;
 
-
-    public GitIgnore() {
-        try {
-            setToken();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static String getToken() {
+    public static String getToken() throws IOException {
+        setToken();
         return GitIgnore.token;
     }
 
-    public void setToken() throws IOException {
+    public static void setToken() throws IOException {
         BufferedReader br = new BufferedReader(new FileReader("bin\\src\\gitignore.txt"));
         try {
             StringBuilder sb = new StringBuilder();
@@ -30,8 +22,8 @@ public class GitIgnore {
                 sb.append(System.lineSeparator());
                 line = br.readLine();
             }
-            String token = sb.toString();
-            this.token = token;
+            String token = sb.toString().replaceAll(" ", "");
+            GitIgnore.token = token;
         } finally {
             br.close();
         }
