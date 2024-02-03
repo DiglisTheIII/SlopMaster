@@ -8,28 +8,36 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 
 public class FileCreator {
 
-    public FileCreator(File file, MessageReceivedEvent event, String slops, String slopDebt, String timer, boolean deleteFile) throws IOException {
-        if(!file.exists()) {
-            file.createNewFile();
-            new LogEvent(file.getAbsolutePath() + " created at bin\\member\\");
-        } else if(deleteFile && file.exists()) {
-            file.delete();
-            file.createNewFile();
-        } else {
-            System.out.println("You exist");
-            new LogEvent(event.getMember().getEffectiveName() + " exists. Exiting function.");
-            return;
+    public FileCreator(File file, MessageReceivedEvent event, String slops, String slopDebt, String timer,
+            boolean deleteFile) throws IOException {
+        File userFile = new File(file.getAbsolutePath() + "\\" + event.getMember().getEffectiveName() + ".txt");
+        File timerFile = new File(file.getAbsolutePath() + "\\timer.txt");
+
+        if (!file.exists()) {
+            file.mkdirs();
+            userFile.createNewFile();
+            timerFile.createNewFile();
         }
 
-        FileWriter fw = new FileWriter(file);
-        new LogEvent("FileWriter fw initialized to file: " + file.getAbsolutePath());
-        if(slops.isEmpty() && slopDebt.isEmpty() && timer.isEmpty()) {
-            slops = "0"; slopDebt = "0"; timer = "0";
+        if (slops.isEmpty() && slopDebt.isEmpty() && timer.isEmpty()) {
+            slops = "0";
+            slopDebt = "0";
+            timer = "0";
         }
 
-        fw.write(event.getMember().getEffectiveName() + "\n" + slops + "\n" + slopDebt + "\n" + timer); //Slops, slopdebt, timer (1 day)
-        fw.flush();
-        fw.close();
-        new LogEvent("fw wrote to slop stats to file successfully");
-    }    
+        FileWriter fw = new FileWriter(userFile);
+
+        if (file != null && userFile != null) {
+            fw.write(event.getMember().getEffectiveName() + "\n" + slops + "\n" + slopDebt); // Slops, slopdebt, timer
+                                                                                             // (1 day)
+            fw.flush();
+            fw.close();
+            new LogEvent("fw wrote to slop stats to file successfully");
+        }
+
+        FileWriter tw = new FileWriter(timerFile);
+        tw.write(timer);
+        tw.flush();
+        tw.close();
+    }
 }

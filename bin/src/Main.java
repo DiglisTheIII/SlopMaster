@@ -9,11 +9,13 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import tools.LogEvent;
+import util.ThreadHandler;
+import util.Token;
 
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        JDA jda = JDABuilder.createDefault("OTQ1MjUwNjA0ODQ1MDA2ODQ4.G0ktLB.ANXwH2dCSD7eFU7ZtOcRIGipCVcI8a6cL4Eq0k")
+        JDA jda = JDABuilder.createDefault(Token.token)
         .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES)
         .addEventListeners(new CommandHandler()).build();
 
@@ -34,17 +36,18 @@ class CommandHandler extends ListenerAdapter {
         try {
             String commandPref = message[0].substring(0, 2).equals("s$") ? "s$" : "";
             command = message[0].substring(2);
-
+            ThreadHandler han = new ThreadHandler();
             if(commandPref.equals("s$")) {
                 switch(command) {
                     case "reg":
                         com.createNewFile();
                         break;
                     case "sloploan":
-                        com.getSlopLoan(false);
+                        com.getSlopLoan();
                         break;
                     case "payloan":
-                        com.getSlopLoan(true);
+                        com.payLoan();
+                        break;
                     case "backup":
                         adm.createBackup();
                         break;

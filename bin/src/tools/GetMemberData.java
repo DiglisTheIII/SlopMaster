@@ -10,7 +10,7 @@ public class GetMemberData {
 
     public static List<String> getData(String name) throws IOException {
         name = name + ".txt";
-        File data = new File("bin\\member\\" + name);
+        File data = new File("bin\\member\\" + name.replaceAll(".txt", "") + "\\" + name);
         return Files.readAllLines(Paths.get(data.toURI()));
     }
 
