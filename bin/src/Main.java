@@ -9,17 +9,24 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import tools.LogEvent;
+import tools.gambling.Blackjack;
+import util.SendMessage;
 import util.ThreadHandler;
 import util.Token;
 
 public class Main {
 
+    static JDA jda;
     public static void main(String[] args) throws IOException {
-        JDA jda = JDABuilder.createDefault(Token.token)
+        jda = JDABuilder.createDefault(Token.token)
         .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES)
-        .addEventListeners(new CommandHandler()).build();
+        .addEventListeners(new CommandHandler(), new Blackjack()).build();
 
         new LogEvent(jda.getHttpClient().toString() + " initialized to " + jda.getToken());
+    }
+
+    public static void addListener(ListenerAdapter adapter) {
+        jda.addEventListener(adapter);
     }
 
 }
@@ -54,6 +61,11 @@ class CommandHandler extends ListenerAdapter {
                     case "info": 
                         com.getData();
                         break;
+                    case "blackjack":
+                        Blackjack blackjack = new Blackjack();
+
+                    default: 
+                        SendMessage.sendMessage(event, "Invalid command. Do s$help for a list of commands");
                 }
             }
         } catch(StringIndexOutOfBoundsException ex) {

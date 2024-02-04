@@ -131,15 +131,21 @@ public class MemberCommands {
             lines = SlopTools.paySlopLoan(lines, user);
 
             File newUser = new File(user.getAbsolutePath());
-            if(user.exists()) {
+            if (user.exists()) {
                 user.delete();
                 newUser.createNewFile();
             }
 
             FileWriter fw = new FileWriter(newUser);
-            fw.write(lines.get(0) + "\n"  + lines.get(1) + "\n" + lines.get(2));
+            fw.write(lines.get(0) + "\n" + lines.get(1) + "\n" + lines.get(2));
             fw.flush();
             fw.close();
+
+            List<String> data = GetMemberData.getData(event.getMember().getEffectiveName());
+
+            SendMessage.sendMessage(event, "Loan paid, new balance: "
+                    + "\nSlops: " + data.get(1)
+                    + "\nSlop Debt: " + data.get(2)).queue();
 
         } catch (Exception e) {
             e.printStackTrace();
