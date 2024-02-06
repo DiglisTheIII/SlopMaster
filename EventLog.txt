@@ -1,1 +1,1 @@
-fw wrote to slop stats to file successfully
+okhttp3.OkHttpClient@156b88f5 initialized to Bot OTQ1MjUwNjA0ODQ1MDA2ODQ4.G3YKnR.r0CMc3wizO6Ek0xgXI2vxPkhUkz9R9ERsIDfAg

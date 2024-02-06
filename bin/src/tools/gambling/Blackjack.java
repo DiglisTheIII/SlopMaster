@@ -20,6 +20,8 @@ public class Blackjack extends ListenerAdapter {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
 
+        //Initializing the user playing, the messages for the commands, and the file of the user playing.
+
         String activeUser = event.getMember().getEffectiveName();
         String[] message = event.getMessage().getContentRaw().split(" ");
         String command = message[0];
@@ -27,6 +29,8 @@ public class Blackjack extends ListenerAdapter {
         command = message[0].substring(2);
         File userFile = new File("bin\\member\\" + event.getMember().getEffectiveName() + "\\");
         List<String> userData;
+
+        //Creates first set of cards placed, the two dealer cards, and two player cards, and what suite and card type they will associate with
 
         int pickDealerCard1 = ThreadLocalRandom.current().nextInt(0, 13);
         int pickDealerSuite1 = ThreadLocalRandom.current().nextInt(0, 4);
@@ -61,6 +65,8 @@ public class Blackjack extends ListenerAdapter {
                 return;
             }
             int bet = Integer.valueOf(message[1]);
+
+            //Creating the actual cards to get a value from
 
             String dealerCard1 = cards.get(pickDealerCard1);
             String dealerSuite1 = suites[pickDealerSuite1];
@@ -102,8 +108,8 @@ public class Blackjack extends ListenerAdapter {
                 userData = GetMemberData.getData(event.getMember().getEffectiveName());
 
                 SendMessage.sendMessage(event, "Dealer total: " + String.valueOf(dealerTotal)
-                        + "\nYour total:" + String.valueOf(playerTotal)
-                        + "\nHit or Stand? (Remaining slops: " + userData.get(1)).queue();
+                        + "\nYour total: " + String.valueOf(playerTotal)
+                        + "\nHit or Stand? (Remaining slops: " + userData.get(1) + ")").queue();
             } catch (IOException e) {
 
             }
@@ -180,6 +186,7 @@ public class Blackjack extends ListenerAdapter {
             int change;
             SlopTools slopTools = new SlopTools(user);
 
+            SendMessage.sendMessage(event, "Dealer Total: " + dealerTotal).queue();
             if((playerTotal > dealerTotal) && playerTotal <= 21) {
                 change = Integer.valueOf(userInfo.get(1)) + bet;
                 slopTools.updateSlops(change);
@@ -255,51 +262,30 @@ public class Blackjack extends ListenerAdapter {
         } else {
             switch (card) {
                 case "jack":
-                    // SendMessage.sendMessage(event, "Dealer placed a jack: 10").queue();
                     return 10;
                 case "queen":
-                    // SendMessage.sendMessage(event, "Dealer placed a queen: 10").queue();
                     return 10;
                 case "king":
-                    // SendMessage.sendMessage(event, "Dealer placed a king: 10").queue();
                     return 10;
                 case "ace":
-                    // SendMessage.sendMessage(event, "Dealer placed an ace: 10").queue();
                     return 10;
                 case "two":
-                    // SendMessage.sendMessage(event, "Dealer placed a two of " + suite + ":
-                    // 2").queue();
                     return 2;
                 case "three":
-                    // SendMessage.sendMessage(event, "Dealer placed a three of " + suite + ":
-                    // 3").queue();
                     return 3;
                 case "four":
-                    // SendMessage.sendMessage(event, "Dealer placed a four of " + suite + ":
-                    // 4").queue();
                     return 4;
                 case "five":
-                    // SendMessage.sendMessage(event, "Dealer placed a five of " + suite + ":
-                    // 5").queue();
                     return 5;
                 case "six":
-                    // SendMessage.sendMessage(event, "Dealer placed a six of " + suite + ":
-                    // 6").queue();
                     return 6;
                 case "seven":
-                    // .sendMessage(event, "Dealer placed a seven of " + suite + ": 7").queue();
                     return 7;
                 case "eight":
-                    // SendMessage.sendMessage(event, "Dealer placed an eight of " + suite + ":
-                    // 8").queue();
                     return 8;
                 case "nine":
-                    // SendMessage.sendMessage(event, "Dealer placed a nine of " + suite + ":
-                    // 9").queue();
                     return 9;
                 case "ten":
-                    // SendMessage.sendMessage(event, "Dealer placed a ten of " + suite + ":
-                    // 10").queue();
                     return 10;
                 default:
                     return 0;

@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import tools.LogEvent;
 import tools.gambling.Blackjack;
 import util.SendMessage;
-import util.ThreadHandler;
 import util.Token;
 
 public class Main {
@@ -43,7 +42,6 @@ class CommandHandler extends ListenerAdapter {
         try {
             String commandPref = message[0].substring(0, 2).equals("s$") ? "s$" : "";
             command = message[0].substring(2);
-            ThreadHandler han = new ThreadHandler();
             if(commandPref.equals("s$")) {
                 switch(command) {
                     case "reg":

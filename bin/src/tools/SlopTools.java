@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 import java.io.FileWriter;
 
 public class SlopTools {
@@ -18,6 +17,7 @@ public class SlopTools {
         this.userFile = userFile;
     }
 
+    //Currently has no implementation. I will need to find a use for it, or refactor my slopLoan command
     public static List<String> getSlopLoan(List<String> userLines, File user, int loanAmount) {
         if(loanAmount > 5000) {
             return null;
@@ -37,9 +37,10 @@ public class SlopTools {
             e.printStackTrace();
         }
 
+        //Pretty basic logic. If you have more than you owe, then you pay that down to 0, if less, then not and pay your current balance.
         int slops = Integer.valueOf(userLines.get(1));
         int slopDebt = Integer.valueOf(userLines.get(2));
-        if (slops > slopDebt) {
+        if (slops >= slopDebt) {
             slops = slops - slopDebt;
             slopDebt = 0;
         } else if (slops <= slopDebt) {

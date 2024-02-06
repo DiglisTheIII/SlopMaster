@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
-
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import tools.FileCreator;
 import tools.GetMemberData;
@@ -23,6 +21,7 @@ public class MemberCommands {
     List<String> lines;
 
     public MemberCommands(MessageReceivedEvent event) {
+        //Boilerplate variable initialization
         this.event = event;
         userFile = new File("bin\\member\\" + event.getMember().getEffectiveName() + "\\");
         timerFile = new File("bin\\member\\" + event.getMember().getEffectiveName() + "\\" + "timer.txt");
@@ -39,6 +38,7 @@ public class MemberCommands {
         }
     }
 
+    //Creates user folder and file.
     public void createNewFile() {
         try {
             fileCreator = new FileCreator(userFile, event, "", "", "", false);
@@ -56,30 +56,34 @@ public class MemberCommands {
 
         int hours = 0, minutes = 0, seconds = 0, timer = 0;
 
+        List<String> userInfo;
         try {
+            //Setup member list, timer list, and timer variable
+            File userInfoFile = new File("bin\\member\\" + event.getMember().getEffectiveName() + "\\" + event.getMember().getEffectiveName() + ".txt");
             List<String> timerList = Files.readAllLines(Paths.get(timerFile.toURI()));
+            userInfo = Files.readAllLines(Paths.get(userInfoFile.toURI()));
             timer = Integer.parseInt(timerList.get(timerList.size() - 1));
 
+            //Setup timer in hours:minutes:seconds
             hours = timer / 3600;
             minutes = (timer % 3600) / 60;
             seconds = timer % 60;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        String remainingTime = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+            String remainingTime = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+            int slopDebt = Integer.parseInt(userInfo.get(2));
+            if (timer > 0 && slopDebt > 0) {
+                SendMessage.sendMessage(event, "You must wait: " + remainingTime).queue();
+                return;
+            }
 
-        if (timer > 0) {
-            SendMessage.sendMessage(event, "You must wait: " + remainingTime).queue();
-            return;
-        }
+            //Sets the loan amount + current amount currently owned
+            int ran = Integer.parseInt(userInfo.get(1))
+                    + Integer.parseInt(event.getMessage().getContentRaw().split(" ")[1]);
 
-        int ran = Integer.parseInt(event.getMessage().getContentRaw().split(" ")[1]);
+            lines.set(1, String.valueOf(ran));
+            lines.set(2, event.getMessage().getContentRaw().split(" ")[1]);
 
-        lines.set(1, String.valueOf(ran));
-        lines.set(2, String.valueOf(ran));
-
-        try {
+            //Deletes the user file, then recreates it to overwrite any changed information, in this scenario, slops.
             userFile.delete();
             userFile.createNewFile();
             FileWriter fw = new FileWriter(user);
@@ -88,6 +92,7 @@ public class MemberCommands {
             fw.flush();
             fw.close();
 
+            //Start timer file, I need to have it overwrite to one line only, as after a while and after 30+ members it will add up on space.
             new Thread() {
                 @Override
                 public void run() {
@@ -114,6 +119,7 @@ public class MemberCommands {
 
     }
 
+    //Standard getter. Gets data from userFile and parses it to a RestAction<?> message event
     public void getData() {
         String name = event.getMember().getEffectiveName();
         try {
@@ -130,6 +136,7 @@ public class MemberCommands {
         try {
             lines = SlopTools.paySlopLoan(lines, user);
 
+            //Deletes userFile for overwrite
             File newUser = new File(user.getAbsolutePath());
             if (user.exists()) {
                 user.delete();
