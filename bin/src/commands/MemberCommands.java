@@ -74,7 +74,7 @@ public class MemberCommands {
             return;
         }
 
-        int ran = ThreadLocalRandom.current().nextInt(1, 255);
+        int ran = Integer.parseInt(event.getMessage().getContentRaw().split(" ")[1]);
 
         lines.set(1, String.valueOf(ran));
         lines.set(2, String.valueOf(ran));

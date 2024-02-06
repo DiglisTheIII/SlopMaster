@@ -4,13 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import okhttp3.internal.ws.RealWebSocket.Message;
-import util.SendMessage;
+import java.io.FileWriter;
 
 public class SlopTools {
     static int slops;
@@ -22,13 +18,13 @@ public class SlopTools {
         this.userFile = userFile;
     }
 
-    public static List<String> getSlopLoan(List<String> userLines, File user) {
-        int random = ThreadLocalRandom.current().nextInt(1, 255);
-        slops = random;
-        slopDebt = random;
+    public static List<String> getSlopLoan(List<String> userLines, File user, int loanAmount) {
+        if(loanAmount > 5000) {
+            return null;
+        }
 
-        userLines.set(1, String.valueOf(slops));
-        userLines.set(2, String.valueOf(slopDebt));
+        userLines.set(1, String.valueOf(loanAmount));
+        userLines.set(2, String.valueOf(loanAmount));
 
         return userLines;
 
@@ -56,5 +52,22 @@ public class SlopTools {
         return userLines;
     }
 
-    
+    public void updateSlops(int slops) {
+        try {
+            List<String> toUpdate = Files.readAllLines(Paths.get(userFile.toURI()));
+
+            FileWriter fw = new FileWriter(userFile);
+            toUpdate.set(1, String.valueOf(slops));
+            userFile.delete();
+            userFile.createNewFile();
+            for(String s : toUpdate) {
+                fw.write(s + "\n");
+                fw.flush();
+            }
+            fw.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
