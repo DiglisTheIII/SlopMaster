@@ -12,25 +12,27 @@ import java.io.BufferedWriter;
 
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import tools.CustomEmbed;
 import tools.GetMemberData;
 import tools.SlopTools;
 import util.SendMessage;
+import java.awt.Color;
 
 public class Blackjack extends ListenerAdapter {
+
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
 
-        //Initializing the user playing, the messages for the commands, and the file of the user playing.
-
-        String activeUser = event.getMember().getEffectiveName();
+        // Initializing the user playing, the messages for the commands, and the file of
+        // the user playing.
         String[] message = event.getMessage().getContentRaw().split(" ");
-        String command = message[0];
-        String commandPref = message[0].substring(0, 2).equals("s$") ? "s$" : "";
-        command = message[0].substring(2);
-        File userFile = new File("bin\\member\\" + event.getMember().getEffectiveName() + "\\");
+        File userFolder = new File("bin\\member\\" + event.getMember().getEffectiveName() + "\\");
         List<String> userData;
+        File blackJackFile = new File(userFolder.getAbsolutePath() + "\\blackjack.txt");
+        FileWriter fw = null;
 
-        //Creates first set of cards placed, the two dealer cards, and two player cards, and what suite and card type they will associate with
+        // Creates first set of cards placed, the two dealer cards, and two player
+        // cards, and what suite and card type they will associate with
 
         int pickDealerCard1 = ThreadLocalRandom.current().nextInt(0, 13);
         int pickDealerSuite1 = ThreadLocalRandom.current().nextInt(0, 4);
@@ -42,31 +44,20 @@ public class Blackjack extends ListenerAdapter {
         int pickPlayerSuite2 = ThreadLocalRandom.current().nextInt(0, 4);
         int dealerTotal = 0;
         int playerTotal = 0;
+        int bet;
 
-        ArrayList<String> cards = new ArrayList<String>();
-        cards.add("jack");
-        cards.add("king");
-        cards.add("queen");
-        cards.add("ace");
-        cards.add("two");
-        cards.add("three");
-        cards.add("four");
-        cards.add("five");
-        cards.add("six");
-        cards.add("seven");
-        cards.add("eight");
-        cards.add("nine");
-        cards.add("ten");
+        ArrayList<String> cards = getCards();
 
         String[] suites = { "hearts", "spades", "diamonds", "clubs" };
+
         if (message[0].equals("s$blackjack")) {
-            if(message.length == 1) {
+            if (message.length == 1) {
                 SendMessage.sendMessage(event, "You need to place a bet").queue();
                 return;
             }
-            int bet = Integer.valueOf(message[1]);
+            bet = Integer.valueOf(message[1]);
 
-            //Creating the actual cards to get a value from
+            // Creating the actual cards to get a value from
 
             String dealerCard1 = cards.get(pickDealerCard1);
             String dealerSuite1 = suites[pickDealerSuite1];
@@ -82,34 +73,24 @@ public class Blackjack extends ListenerAdapter {
             playerTotal = cardSwitch(playerCard1, playerSuite1, event, false)
                     + cardSwitch(playerCard2, playerSuite2, event, false);
 
-            File blackJackFile = new File("bin\\member\\" + event.getMember().getEffectiveName() + "\\blackjack.txt");
+            updateBJFile(dealerTotal, postTotal, playerTotal, bet, fw, blackJackFile);
 
-            try {
-                FileWriter fw = new FileWriter(blackJackFile);
-                if (blackJackFile.exists()) {
-                    blackJackFile.delete();
-                    blackJackFile.createNewFile();
-                } else {
-                    blackJackFile.createNewFile();
-                }
-                fw.write(dealerTotal + "\n" + postTotal + "\n" + playerTotal + "\n" + String.valueOf(bet));
-                fw.flush();
-                fw.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
+            // If player goes over 21 on first draw, end game, no losses.
             if (playerTotal > 21) {
                 SendMessage.sendMessage(event, "You went over 21. Busted! \nTotal: " + playerTotal).queue();
-
                 return;
             }
+
             try {
                 userData = GetMemberData.getData(event.getMember().getEffectiveName());
 
-                SendMessage.sendMessage(event, "Dealer total: " + String.valueOf(dealerTotal)
-                        + "\nYour total: " + String.valueOf(playerTotal)
-                        + "\nHit or Stand? (Remaining slops: " + userData.get(1) + ")").queue();
+                event.getChannel().sendMessageEmbeds(new CustomEmbed(
+                  "---- Current game ----",
+            "Game Stats:",
+                        "black",
+                        "Dealer total: " + String.valueOf(dealerTotal)
+                                , "\nYour total: " + String.valueOf(playerTotal)
+                                , "\nHit or Stand? (Remaining slops: " + userData.get(1) + ")").build()).queue();
             } catch (IOException e) {
 
             }
@@ -119,13 +100,50 @@ public class Blackjack extends ListenerAdapter {
             hit(event, cards, suites);
         }
 
-        if(message[0].equals("s$stand")) {
+        if (message[0].equals("s$stand")) {
             stand(event);
         }
 
     }
 
-    public void hit(MessageReceivedEvent event, ArrayList<String> cards, String[] suites) {
+    public void updateBJFile(int dealerTotal, int postTotal, int playerTotal, int bet, FileWriter fw,
+            File blackJackFile) {
+        try {
+            fw = new FileWriter(blackJackFile);
+            if (blackJackFile.exists()) {
+                blackJackFile.delete();
+                blackJackFile.createNewFile();
+            } else {
+                blackJackFile.createNewFile();
+            }
+            fw.write(dealerTotal + "\n" + postTotal + "\n" + playerTotal + "\n" + String.valueOf(bet));
+            fw.flush();
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ArrayList<String> getCards() {
+        ArrayList<String> cards = new ArrayList<String>();
+        cards.add("jack");
+        cards.add("king");
+        cards.add("queen");
+        cards.add("ace");
+        cards.add("two");
+        cards.add("three");
+        cards.add("four");
+        cards.add("five");
+        cards.add("six");
+        cards.add("seven");
+        cards.add("eight");
+        cards.add("nine");
+        cards.add("ten");
+
+        return cards;
+    }
+
+    protected void hit(MessageReceivedEvent event, ArrayList<String> cards, String[] suites) {
 
         int tempCardPick = ThreadLocalRandom.current().nextInt(0, 13);
         int tempSuitePick = ThreadLocalRandom.current().nextInt(0, 4);
@@ -133,7 +151,8 @@ public class Blackjack extends ListenerAdapter {
         String tempSuite = suites[tempSuitePick];
 
         File blackjack = new File("bin\\member\\" + event.getMember().getEffectiveName() + "\\blackjack.txt");
-        File userFile = new File("bin\\member\\" + event.getMember().getEffectiveName() + "\\" + event.getMember().getEffectiveName() + ".txt");
+        File userFile = new File("bin\\member\\" + event.getMember().getEffectiveName() + "\\"
+                + event.getMember().getEffectiveName() + ".txt");
 
         try {
 
@@ -155,7 +174,8 @@ public class Blackjack extends ListenerAdapter {
                 playerSlops = playerSlops - bet;
                 SendMessage.sendMessage(event, "Bust! You went over 21. Remaining slops: " + playerSlops).queue();
 
-                new SlopTools(new File("bin\\member\\" + event.getMember().getEffectiveName() + "\\" + event.getMember().getEffectiveName() + ".txt")).updateSlops(playerSlops);
+                new SlopTools(new File("bin\\member\\" + event.getMember().getEffectiveName() + "\\"
+                        + event.getMember().getEffectiveName() + ".txt")).updateSlops(playerSlops);
                 return;
             }
 
@@ -173,9 +193,10 @@ public class Blackjack extends ListenerAdapter {
 
     }
 
-    public void stand(MessageReceivedEvent event) {
+    protected void stand(MessageReceivedEvent event) {
         File blackjack = new File("bin\\member\\" + event.getMember().getEffectiveName() + "\\blackjack.txt");
-        File user = new File("bin\\member\\" + event.getMember().getEffectiveName() + "\\" + event.getMember().getEffectiveName() + ".txt");
+        File user = new File("bin\\member\\" + event.getMember().getEffectiveName() + "\\"
+                + event.getMember().getEffectiveName() + ".txt");
         try {
             ArrayList<String> info = (ArrayList<String>) Files.readAllLines(Paths.get(blackjack.toURI()));
             ArrayList<String> userInfo = (ArrayList<String>) Files.readAllLines(Paths.get(user.toURI()));
@@ -187,25 +208,28 @@ public class Blackjack extends ListenerAdapter {
             SlopTools slopTools = new SlopTools(user);
 
             SendMessage.sendMessage(event, "Dealer Total: " + dealerTotal).queue();
-            if((playerTotal > dealerTotal) && playerTotal <= 21) {
+            if ((playerTotal > dealerTotal) && playerTotal <= 21) {
                 change = Integer.valueOf(userInfo.get(1)) + bet;
                 slopTools.updateSlops(change);
                 SendMessage.sendMessage(event, "You win: " + bet + " slops!").queue();
                 return;
-            } else if(dealerTotal > 21) {
+            } else if (dealerTotal > 21) {
                 change = Integer.valueOf(userInfo.get(1)) + bet;
                 slopTools.updateSlops(change);
                 SendMessage.sendMessage(event, "You win: " + bet + " slops!").queue();
                 return;
-            } else if(playerTotal < dealerTotal) {
+            } else if (playerTotal < dealerTotal) {
                 change = Integer.valueOf(userInfo.get(1)) - bet;
                 slopTools.updateSlops(change);
                 SendMessage.sendMessage(event, "You lose: " + bet + " slops!").queue();
                 return;
-            } else if(playerTotal > 21) {
+            } else if (playerTotal > 21) {
                 change = Integer.valueOf(userInfo.get(1)) - bet;
                 slopTools.updateSlops(change);
                 SendMessage.sendMessage(event, "You lose: " + bet + " slops!").queue();
+                return;
+            } else if (playerTotal == dealerTotal) {
+                SendMessage.sendMessage(event, "You and the dealer have the same value. No winner or loser.").queue();
                 return;
             }
         } catch (IOException e) {

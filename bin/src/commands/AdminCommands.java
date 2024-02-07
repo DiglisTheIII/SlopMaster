@@ -5,6 +5,7 @@ import java.security.Permission;
 import java.util.List;
 
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Mentions;
 import net.dv8tion.jda.api.entities.UserSnowflake;
@@ -54,6 +55,18 @@ public class AdminCommands {
         } else {
             def.queue();
         }
+    }
+
+    public void getActivities() {
+        Member c = event.getMessage().getMentions().getMembers().get(0);
+        
+        List<Activity> act = c.getActivities();
+        String presence = act.get(0).toString().substring(13, act.get(0).toString().indexOf("("));
+
+        for(Activity a : act) {
+            
+        }
+        System.out.println(c.getEffectiveName());
     }
     
 }

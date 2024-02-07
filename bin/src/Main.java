@@ -1,14 +1,18 @@
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 import commands.AdminCommands;
 import commands.MemberCommands;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import tools.LogEvent;
+import tools.funny.LeagueListener;
 import tools.gambling.Blackjack;
 import util.SendMessage;
 import util.Token;
@@ -18,10 +22,9 @@ public class Main {
     static JDA jda;
     public static void main(String[] args) throws IOException {
         jda = JDABuilder.createDefault(Token.token)
-        .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES)
-        .addEventListeners(new CommandHandler(), new Blackjack()).build();
-
-        new LogEvent(jda.getHttpClient().toString() + " initialized to " + jda.getToken());
+        .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_PRESENCES)
+        .enableCache(CacheFlag.ACTIVITY)
+        .addEventListeners(new CommandHandler(), new Blackjack(), new LeagueListener()).build();
     }
 
     public static void addListener(ListenerAdapter adapter) {
@@ -59,9 +62,12 @@ class CommandHandler extends ListenerAdapter {
                     case "info": 
                         com.getData();
                         break;
-                    case "blackjack":
-                        Blackjack blackjack = new Blackjack();
-
+                    case "help":
+                        com.help(event).queue();
+                        break;
+                    case "activity":
+                        adm.getActivities();
+                        break;
                     default: 
                         SendMessage.sendMessage(event, "Invalid command. Do s$help for a list of commands");
                 }

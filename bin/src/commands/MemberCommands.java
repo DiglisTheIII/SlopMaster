@@ -6,7 +6,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.requests.RestAction;
+import tools.CustomEmbed;
 import tools.FileCreator;
 import tools.GetMemberData;
 import tools.SlopTools;
@@ -157,6 +161,20 @@ public class MemberCommands {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public RestAction<?> help(MessageReceivedEvent event) {
+        final String title = "Command List";
+        final String desc = "List of all commands";
+
+        CustomEmbed help = new CustomEmbed(title, desc, "black", 
+            "s$help - Displays list of commands.",
+                      "s$reg - Registers you for gambling and loans.",
+                      "s$sloploan [number amount] - Pulls loan up to signed 32-bit integer limit.",
+                      "s$payloan - Pays off your loan with whatever slops you currently have.",
+                      "s$blackjack [bet amount as number] - comes with s$hit and s$stand, a standard game of blackjack");
+        
+        return event.getChannel().sendMessageEmbeds(help.build());
     }
 
 }
