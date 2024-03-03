@@ -1,11 +1,13 @@
 package tools.gambling;
 
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import tools.CustomEmbed;
 import util.SendMessage;
 
 import java.util.List;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -40,12 +42,18 @@ public class Fishing extends ListenerAdapter {
             totalValue();
             return;
         }
+        if(com.equals("m$sell")) {
+            sell();
+            return;
+        }
     }
     
     public void castLine() {
+        Message msg = event.getMessage();
         int rand = ThreadLocalRandom.current().nextInt(0, 30);
         if(rand > 4) {
-            SendMessage.sendMessage(event, rand + "You caught nothing retard.").queue();
+            msg.delete().complete();
+            SendMessage.sendMessage(event, "You suck at fishing.").queue();
         } else {
             event.getChannel().sendMessage(Items.getNameFromValue(rand)).queue();
             mem.updateInventory(rand);
@@ -64,13 +72,29 @@ public class Fishing extends ListenerAdapter {
 
     }
 
-    public void totalValue() {
+    public int totalValue() {
         int price = 0;
         for(int i = 0; i < mem.getInventory().size(); i++) {
             price += mem.getInventory().get(i).getCost();
         }
 
         SendMessage.sendMessage(event, "Total value of inventory: " + price + " Munt Bucks").queue();
+        return price;
+    }
+
+    public void sell() {
+        String name = io.readFileLine(0);
+        String munts = io.readFileLine(1);
+        String muntDebt = io.readFileLine(2);
+
+        int totalMunts = Integer.valueOf(munts) + totalValue();
+
+        munts = String.valueOf(totalMunts);
+
+        io.deleteFile();
+        io.createFile();
+        String[] data = {name.concat("\n"), munts.concat("\n"), muntDebt.concat("\n\n\n\n\n")};
+        io.writeToFile(data);
     }
 
     public List<Integer> lootTable() {

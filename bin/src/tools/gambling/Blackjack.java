@@ -22,7 +22,7 @@ public class Blackjack extends ListenerAdapter {
      * and optimize it at some point, and I will definitely do better on the next gambling
      * game I end up adding (likely roulette).
      */
-
+    int bet;
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
@@ -51,7 +51,6 @@ public class Blackjack extends ListenerAdapter {
         int pickPlayerSuite2 = ThreadLocalRandom.current().nextInt(0, 4);
         int dealerTotal = 0;
         int playerTotal = 0;
-        int bet;
         int postTotal; //The total after all cards are added together.
 
         ArrayList<String> cards = getCards();
@@ -173,7 +172,6 @@ public class Blackjack extends ListenerAdapter {
             ArrayList<String> info = (ArrayList<String>) Files.readAllLines(Paths.get(blackjack.getURI()));
             int dealerTotal = Integer.valueOf(info.get(1));
             int playerTotal = Integer.valueOf(info.get(2));
-            int bet = Integer.valueOf(info.get(3));
             int change;
 
             SendMessage.sendMessage(event, "Dealer Total: " + dealerTotal).queue();

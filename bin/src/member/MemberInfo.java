@@ -63,7 +63,7 @@ public class MemberInfo {
         ArrayList<Items> items = new ArrayList<Items>();
         try {
             List<String> lines = Files.readAllLines(io.getPath());
-            for(int i = 8; i < lines.size(); i++) {
+            for(int i = 7; i < lines.size(); i++) {
                 if(!lines.get(i).isEmpty()) {
                     items.add(Items.getItemFromValue(Integer.parseInt(lines.get(i))));
                 }

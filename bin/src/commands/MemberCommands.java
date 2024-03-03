@@ -38,6 +38,11 @@ public class MemberCommands {
     public void getMuntLoan() {
         String userMunts = event.getMessage().getContentRaw().split(" ")[1];
         
+        if(Integer.valueOf(userMunts) > 5000) {
+            SendMessage.sendMessage(event, "You cannot pull more than 5000 Munt Bucks").queue();
+            return;
+        }
+
         if(Integer.valueOf(userMunts) instanceof Integer) {
             io.modifyLineInFile(userMunts, 1);
             io.modifyLineInFile(userMunts, 2);

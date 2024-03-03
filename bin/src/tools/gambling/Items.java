@@ -63,21 +63,7 @@ public enum Items {
     }
 
     public static String getNameFromValue(int value) {
-        switch(value) {
-            case 0:
-                return "Munt Juice Bottle";
-            case 1:
-                return "Acorn Bacta Fluid";
-            case 2:
-                return "The Demon Of Hatred";
-            case 3:
-                return "The Hand Of God";
-            case 4:
-                return "Big Stinky Fart Bomb";
-            default:
-                return "";
-
-        }
+        return getItemFromValue(value).NAME;
     }
 
 
