@@ -1,17 +1,16 @@
 package commands;
 
 import java.io.IOException;
-import java.security.Permission;
 import java.util.List;
+import java.util.Collections;
 
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Mentions;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.requests.RestAction;
 import tools.BackupUserData;
+import java.util.ArrayList;
 import util.SendMessage;
 
 public class AdminCommands {
@@ -36,7 +35,7 @@ public class AdminCommands {
     }
 
     public void kick(MessageReceivedEvent event) {
-        if(isAdmin) {
+        if (isAdmin) {
             List<Member> userToKick = event.getMessage().getMentions().getMembers();
             event.getGuild().kick(UserSnowflake.fromId(userToKick.get(0).getIdLong()));
             SendMessage.sendMessage(event, userToKick.get(0).getEffectiveName());
@@ -46,7 +45,7 @@ public class AdminCommands {
     }
 
     public void createBackup() {
-        if(isAdmin) {
+        if (isAdmin) {
             try {
                 BackupUserData.backupFiles();
             } catch (IOException e) {
@@ -57,16 +56,27 @@ public class AdminCommands {
         }
     }
 
-    public void getActivities() {
-        Member c = event.getMessage().getMentions().getMembers().get(0);
-        
-        List<Activity> act = c.getActivities();
-        String presence = act.get(0).toString().substring(13, act.get(0).toString().indexOf("("));
+    public void shuffleNames() {
+        if (isAdmin) {
+            List<Member> members = event.getGuild().getMembers();
+            ArrayList<String> names = new ArrayList<String>();
+            for (int i = 0; i < members.size(); i++) {
+                names.add(members.get(i).getEffectiveName());
+            }
+            Collections.shuffle(names);
+            for (int i = 0; i < names.size(); i++) {
+                if(!members.get(i).hasPermission(net.dv8tion.jda.api.Permission.ADMINISTRATOR)) {
+                    members.get(i).modifyNickname(names.get(i)).complete();
+                }
 
-        for(Activity a : act) {
+            }
             
         }
-        System.out.println(c.getEffectiveName());
+
     }
-    
+
+    public void getActivities() {
+        
+    }
+
 }

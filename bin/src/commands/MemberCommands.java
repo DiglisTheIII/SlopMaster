@@ -1,165 +1,88 @@
 package commands;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
-
-import net.dv8tion.jda.api.EmbedBuilder;
+import bin.util.FileIO;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.requests.RestAction;
 import tools.CustomEmbed;
-import tools.FileCreator;
-import tools.GetMemberData;
-import tools.SlopTools;
 import util.SendMessage;
 
 public class MemberCommands {
-    FileCreator fileCreator;
     MessageReceivedEvent event;
-    File userFile;
-    File timerFile;
+    File guildFile;
     File user;
-    List<String> lines;
+    FileIO io;
 
     public MemberCommands(MessageReceivedEvent event) {
         //Boilerplate variable initialization
         this.event = event;
-        userFile = new File("bin\\member\\" + event.getMember().getEffectiveName() + "\\");
-        timerFile = new File("bin\\member\\" + event.getMember().getEffectiveName() + "\\" + "timer.txt");
-        user = new File(userFile.getAbsolutePath() + "\\" + event.getMember().getEffectiveName() + ".txt");
-
-        try {
-            if (user.exists()) {
-                lines = Files.readAllLines(Paths.get(user.toURI()));
-            } else {
-                return;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        guildFile = new File("bin\\member\\" + event.getGuild().getName() + "\\");
+        if(!guildFile.exists()) {
+            guildFile.mkdirs();
         }
+
+        user = new File(guildFile.getAbsolutePath() + "\\" + event.getMember().getEffectiveName() + ".txt");
+        io = new FileIO(user);
     }
 
     //Creates user folder and file.
     public void createNewFile() {
-        try {
-            fileCreator = new FileCreator(userFile, event, "", "", "", false);
-        } catch (IOException e) {
-            e.printStackTrace();
+        io.createFile();
+
+        String[] data = {event.getMember().getEffectiveName().concat("\n"), "0\n", "0\n\n\n\n\n"};
+        io.writeToFile(data);
+        
+    }
+
+    //Sets user data (Munt Bucks and Munt Loans) to specified amount.
+    public void getMuntLoan() {
+        String userMunts = event.getMessage().getContentRaw().split(" ")[1];
+        
+        if(Integer.valueOf(userMunts) instanceof Integer) {
+            io.modifyLineInFile(userMunts, 1);
+            io.modifyLineInFile(userMunts, 2);
         }
     }
 
-    public void getSlopLoan() {
-        if (!userFile.exists()) {
-            SendMessage.sendMessage(event, "You must register with s$reg first").queue();
+    public void bankruptcy() {
+        io.modifyLineInFile("0", 1);
+        io.modifyLineInFile("0", 1);
+    }
+
+    public void tagAcorn() throws InterruptedException {
+        for(int i = 0; i < 20; i++) {
+            Thread.sleep(500);
+            SendMessage.sendMessage(event, "<@1075551511238680637> vc").queue();
+        }
+    }
+
+    public void getData() {
+        CustomEmbed data = new CustomEmbed("Munt Gambling", "All of your Munting needs right here.", "black", 
+        "Munt Bucks: " + io.readFileLine(1),
+        "Munt Debt: " + io.readFileLine(2));
+
+        event.getChannel().sendMessageEmbeds(data.build()).queue();
+    }
+
+    
+    public void payLoan() {
+        int payment = Integer.valueOf(event.getMessage().getContentRaw().split(" ")[1]);
+        int userMunts = Integer.valueOf(io.readFileLine(1));
+        int userDebt = Integer.valueOf(io.readFileLine(2));
+        if(userDebt == 0) {
+            event.getChannel().sendMessage("You don't owe any Munts").queue();
             return;
         }
-        System.out.println("Lines of userfile from: " + lines.hashCode() + " initialized to lines<String> list");
 
-        int hours = 0, minutes = 0, seconds = 0, timer = 0;
+        if(payment > userMunts) {
+            event.getChannel().sendMessage("You can't generate free Munt Bucks now, can you?").queue();
+        } else if(payment <= userMunts) {
+            userMunts = userMunts - payment;
+            userDebt = userDebt - payment;
 
-        List<String> userInfo;
-        try {
-            //Setup member list, timer list, and timer variable
-            File userInfoFile = new File("bin\\member\\" + event.getMember().getEffectiveName() + "\\" + event.getMember().getEffectiveName() + ".txt");
-            List<String> timerList = Files.readAllLines(Paths.get(timerFile.toURI()));
-            userInfo = Files.readAllLines(Paths.get(userInfoFile.toURI()));
-            timer = Integer.parseInt(timerList.get(timerList.size() - 1));
-
-            //Setup timer in hours:minutes:seconds
-            hours = timer / 3600;
-            minutes = (timer % 3600) / 60;
-            seconds = timer % 60;
-
-            String remainingTime = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-            int slopDebt = Integer.parseInt(userInfo.get(2));
-            if (timer > 0 && slopDebt > 0) {
-                SendMessage.sendMessage(event, "You must wait: " + remainingTime).queue();
-                return;
-            }
-
-            //Sets the loan amount + current amount currently owned
-            int ran = Integer.parseInt(userInfo.get(1))
-                    + Integer.parseInt(event.getMessage().getContentRaw().split(" ")[1]);
-
-            lines.set(1, String.valueOf(ran));
-            lines.set(2, event.getMessage().getContentRaw().split(" ")[1]);
-
-            //Deletes the user file, then recreates it to overwrite any changed information, in this scenario, slops.
-            userFile.delete();
-            userFile.createNewFile();
-            FileWriter fw = new FileWriter(user);
-
-            fw.write(event.getMember().getEffectiveName() + "\n" + lines.get(1) + "\n" + lines.get(2));
-            fw.flush();
-            fw.close();
-
-            //Start timer file, I need to have it overwrite to one line only, as after a while and after 30+ members it will add up on space.
-            new Thread() {
-                @Override
-                public void run() {
-                    int timer = 86400;
-                    try {
-                        FileWriter tw = new FileWriter(timerFile, false);
-                        while (timer > 0) {
-                            timerFile.delete();
-                            timerFile.createNewFile();
-                            timer--;
-                            Thread.sleep(1000);
-                            tw.write(String.valueOf(timer) + "\n");
-                            tw.flush();
-                        }
-                        tw.close();
-                    } catch (IOException | InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    //Standard getter. Gets data from userFile and parses it to a RestAction<?> message event
-    public void getData() {
-        String name = event.getMember().getEffectiveName();
-        try {
-            List<String> data = GetMemberData.getData(name);
-            SendMessage.sendMessage(event, "Name: " + data.get(0)
-                    + "\nSlops: " + data.get(1)
-                    + "\nSlop Debt: " + data.get(2)).queue();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void payLoan() {
-        try {
-            lines = SlopTools.paySlopLoan(lines, user);
-
-            //Deletes userFile for overwrite
-            File newUser = new File(user.getAbsolutePath());
-            if (user.exists()) {
-                user.delete();
-                newUser.createNewFile();
-            }
-
-            FileWriter fw = new FileWriter(newUser);
-            fw.write(lines.get(0) + "\n" + lines.get(1) + "\n" + lines.get(2));
-            fw.flush();
-            fw.close();
-
-            List<String> data = GetMemberData.getData(event.getMember().getEffectiveName());
-
-            SendMessage.sendMessage(event, "Loan paid, new balance: "
-                    + "\nSlops: " + data.get(1)
-                    + "\nSlop Debt: " + data.get(2)).queue();
-
-        } catch (Exception e) {
-            e.printStackTrace();
+            io.modifyLineInFile(String.valueOf(userMunts), 1);
+            io.modifyLineInFile(String.valueOf(userDebt), 2);
+            getData();
         }
     }
 
@@ -168,11 +91,11 @@ public class MemberCommands {
         final String desc = "List of all commands";
 
         CustomEmbed help = new CustomEmbed(title, desc, "black", 
-            "s$help - Displays list of commands.",
-                      "s$reg - Registers you for gambling and loans.",
-                      "s$sloploan [number amount] - Pulls loan up to signed 32-bit integer limit.",
-                      "s$payloan - Pays off your loan with whatever slops you currently have.",
-                      "s$blackjack [bet amount as number] - comes with s$hit and s$stand, a standard game of blackjack");
+            "m$help - Displays list of commands.",
+                      "m$reg - Registers you for gambling and loans.",
+                      "m$muntloan [number amount] - Pulls loan up to signed 32-bit integer limit.",
+                      "m$payloan - Pays off your loan with whatever slops you currently have.",
+                      "m$muntjack [bet amount as number] - use m$hit and m$stand as needed, a standard game of Muntjack");
         
         return event.getChannel().sendMessageEmbeds(help.build());
     }

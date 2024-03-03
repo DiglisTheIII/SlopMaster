@@ -1,19 +1,15 @@
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.List;
-
 import commands.AdminCommands;
 import commands.MemberCommands;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
-import tools.LogEvent;
-import tools.funny.LeagueListener;
 import tools.gambling.Blackjack;
+import tools.gambling.Fishing;
 import util.SendMessage;
 import util.Token;
 
@@ -24,7 +20,7 @@ public class Main {
         jda = JDABuilder.createDefault(Token.token)
         .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_PRESENCES)
         .enableCache(CacheFlag.ACTIVITY)
-        .addEventListeners(new CommandHandler(), new Blackjack(), new LeagueListener()).build();
+        .addEventListeners(new CommandHandler(), new Blackjack(), new Fishing()).build();
     }
 
     public static void addListener(ListenerAdapter adapter) {
@@ -42,16 +38,17 @@ class CommandHandler extends ListenerAdapter {
         MemberCommands com = new MemberCommands(event);
         String[] message = event.getMessage().getContentRaw().split(" ");
         String command = message[0];
+
         try {
-            String commandPref = message[0].substring(0, 2).equals("s$") ? "s$" : "";
+            String commandPref = message[0].substring(0, 2).equals("m$") ? "m$" : "";
             command = message[0].substring(2);
-            if(commandPref.equals("s$")) {
+            if(commandPref.equals("m$")) {
                 switch(command) {
                     case "reg":
                         com.createNewFile();
                         break;
-                    case "sloploan":
-                        com.getSlopLoan();
+                    case "muntloan":
+                        com.getMuntLoan();
                         break;
                     case "payloan":
                         com.payLoan();
@@ -68,8 +65,22 @@ class CommandHandler extends ListenerAdapter {
                     case "activity":
                         adm.getActivities();
                         break;
+                    case "bankrupt":
+                        com.bankruptcy();
+                        break;
+                    case "shufname":
+                        adm.shuffleNames();
+                        break;
+                    case "acorn":
+                        try {
+                            com.tagAcorn();
+                        } catch (InterruptedException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+                        break;
                     default: 
-                        SendMessage.sendMessage(event, "Invalid command. Do s$help for a list of commands");
+                        SendMessage.sendMessage(event, "Invalid command. Do m$help for a list of commands");
                 }
             }
         } catch(StringIndexOutOfBoundsException ex) {

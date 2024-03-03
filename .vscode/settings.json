@@ -1,6 +1,7 @@
 {
     "java.project.referencedLibraries": [
         "lib/**/*.jar",
-        "c:\\Users\\Mason\\Downloads\\JDA-5.0.0-beta.20-withDependencies.jar"
+        "c:\\Users\\Mason\\Downloads\\JDA-5.0.0-beta.20-withDependencies.jar",
+        "c:\\Users\\Mason\\Documents\\JavaLibs\\FileTools.jar"
     ]
 }
