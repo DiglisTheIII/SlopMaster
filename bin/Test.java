@@ -1,6 +1,7 @@
 package bin;
 
 import member.MemberInfo;
+import member.Shop;
 import tools.gambling.Items;
 
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ public class Test {
     public static void main(String[] args) {
         MemberInfo mem = new MemberInfo("C:\\Users\\Mason\\Documents\\VS\\java\\SlopMaster\\bin\\member\\Lich Kings Realm\\jelqing genie.txt");
 
-        System.out.println(Items.getNameFromValue(1));
+        System.out.println();
     }
 
 }

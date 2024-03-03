@@ -31,7 +31,7 @@ public class MemberCommands {
 
         String[] data = {event.getMember().getEffectiveName().concat("\n"), "0\n", "0\n\n\n\n\n"};
         io.writeToFile(data);
-        
+        SendMessage.sendMessage(event, "You have been munted.").queue();
     }
 
     //Sets user data (Munt Bucks and Munt Loans) to specified amount.

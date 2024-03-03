@@ -2,6 +2,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import commands.AdminCommands;
 import commands.MemberCommands;
+import member.Shop;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -20,7 +21,7 @@ public class Main {
         jda = JDABuilder.createDefault(Token.token)
         .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_PRESENCES)
         .enableCache(CacheFlag.ACTIVITY)
-        .addEventListeners(new CommandHandler(), new Blackjack(), new Fishing()).build();
+        .addEventListeners(new CommandHandler(), new Blackjack(), new Fishing(), new Shop()).build();
     }
 
     public static void addListener(ListenerAdapter adapter) {

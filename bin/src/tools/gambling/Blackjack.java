@@ -8,6 +8,8 @@ import bin.util.FileIO;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import tools.CustomEmbed;
@@ -23,6 +25,7 @@ public class Blackjack extends ListenerAdapter {
      * game I end up adding (likely roulette).
      */
     int bet;
+    int playerMunts;
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
@@ -108,8 +111,16 @@ public class Blackjack extends ListenerAdapter {
 
     public void updateBJFile(int dealerTotal, int postTotal, int playerTotal, int bet, FileIO blackJackFile) {
         String[] data = {dealerTotal + "\n", postTotal + "\n", playerTotal + "\n", String.valueOf(bet)};
-
-        blackJackFile.writeToFile(data);
+        blackJackFile.deleteFile();
+        blackJackFile.createFile();
+        for(String s : data) {
+            try {
+                Files.write(blackJackFile.getPath(), s.getBytes(), StandardOpenOption.APPEND);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
     }
 
     public ArrayList<String> getCards() {
@@ -144,8 +155,8 @@ public class Blackjack extends ListenerAdapter {
                 "bin\\member\\" + event.getGuild().getName() + "\\" + event.getMember().getEffectiveName() + "_bj.txt");
 
             int playerTotal = Integer.valueOf(blackjack.readFileLine(2));
-            int playerMunts = Integer.valueOf(user.readFileLine(1));
-            int bet = Integer.valueOf(blackjack.readFileLine(3));
+            playerMunts = Integer.valueOf(user.readFileLine(1));
+            bet = Integer.valueOf(blackjack.readFileLine(3));
 
 
             playerTotal = playerTotal + cardSwitch(tempCard, tempSuite, event, false);
@@ -154,6 +165,7 @@ public class Blackjack extends ListenerAdapter {
 
             if (playerTotal > 21) {
                 playerMunts = playerMunts - bet;
+                System.out.println(playerMunts + "    " + bet);
                 SendMessage.sendMessage(event, "Bust! You went over 21. Remaining munts: " + playerMunts).queue();
 
                 user.modifyLineInFile(String.valueOf(playerMunts), 1);
